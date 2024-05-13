@@ -120,9 +120,14 @@ contract Game with Deployable {
         } else {
             // TODO: use foreach (k, v in m) {}
             let i: Int = 0;
-            while (i < self.playersCounter) {
+            let counter: Int = self.playersCounter;
+            while (i < counter) {
                 if(self.players.get(i)!! != playerAddress) {
                     self.appendPlayer(playerAddress);
+                } else {
+                    self.sendRemainingValue(playerAddress);
+
+                    return;
                 }
 
                 i += 1;
@@ -148,6 +153,9 @@ contract Game with Deployable {
     }
 
     fun distributeBalance() {
+        // send remaining value to the sender
+        self.sendRemainingValue(sender());
+
         if (self.winner != null) {
             send(SendParameters{
                 to: self.winner!!,
@@ -156,19 +164,10 @@ contract Game with Deployable {
                 body: "Congrats, you are the winner!".asComment()
             });
         } else {
-            // send remaining value to the sender
-            send(SendParameters{
-                to: sender(),
-                value: 0,
-                mode: SendRemainingValue,
-                body: "Remaining value to sender".asComment()
-            });
-            
             // TODO: distribute the balance so that the players spend the same amount of money in any case
-            let balance: Int = myBalance();
             // amount for transaction fee
             let safeAmount: Int = ton("0.025");
-            let amount: Int = (balance / self.playersCounter) - safeAmount;
+            let amount: Int = (myBalance() / self.playersCounter) - safeAmount;
 
             // TODO: use foreach (k, v in m) {}
             let i: Int = 0;
@@ -191,7 +190,19 @@ contract Game with Deployable {
     }
 
     fun runRandom(): Int {
+        nativeRandomize(abs(randomInt() - myBalance()) + now());
+        nativeRandomizeLt();
+
         return random(1, 1000);
+    }
+
+    fun sendRemainingValue(address: Address) {
+        send(SendParameters{
+            to: address,
+            value: 0,
+            mode: SendRemainingValue,
+            body: "Refund of the remaining value".asComment()
+        });
     }
 
     fun isGameFull(): Bool {
