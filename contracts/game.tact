@@ -17,6 +17,7 @@ contract Game with Deployable {
     // initial value is -1
     lastNumber: Int = -1;
     winner: Address? = null;
+    fewWinners: Bool = false;
 
     init(parent: Address, seqno: Int, maxPlayers: Int) {
         self.parent = parent;
@@ -56,8 +57,9 @@ contract Game with Deployable {
                 if (rightAnswerPlayerAddress == null) {
                     rightAnswerPlayerAddress = playerAddress;
                 } else {
-                    // TODO: no winner (temporary solution; now, in any case, the money will be divided equally)
+                    // when we have more than one right answer
                     rightAnswerPlayerAddress = null;
+                    self.fewWinners = true;
                 }
             }
             
@@ -95,8 +97,9 @@ contract Game with Deployable {
                 if (rightAnswerPlayerAddress == null) {
                     rightAnswerPlayerAddress = playerAddress;
                 } else {
-                    // TODO: no winner (temporary solution; now, in any case, the money will be divided equally)
+                    // when we have more than one right answer
                     rightAnswerPlayerAddress = null;
+                    self.fewWinners = true;
                 }
             }
             
@@ -154,6 +157,18 @@ contract Game with Deployable {
     }
 
     fun distributeBalance() {
+        // if no winner, send remaining balance to the sender
+        if (!self.fewWinners && self.winner == null) {
+            send(SendParameters{
+                to: sender(),
+                value: 0,
+                mode: SendRemainingBalance + SendIgnoreErrors,
+                body: "No winner".asComment()
+            });
+
+            return;
+        }
+
         // send remaining value to the sender
         self.sendRemainingValue(sender());
 
@@ -165,7 +180,6 @@ contract Game with Deployable {
                 body: "Congrats, you are the winner!".asComment()
             });
         } else {
-            // TODO: distribute the balance so that the players spend the same amount of money in any case
             // amount for transaction fee
             let safeAmount: Int = ton("0.025");
             let amount: Int = (myBalance() / self.playersCounter) - safeAmount;
@@ -258,6 +272,7 @@ contract Game with Deployable {
             maxPlayers: self.maxPlayers,
             lastNumber: self.lastNumber,
             winner: self.winner,
+            fewWinners: self.fewWinners,
             isGameFull: self.isGameFull(),
             balance: myBalance()
         };
