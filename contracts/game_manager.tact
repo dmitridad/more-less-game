@@ -1,6 +1,7 @@
 import "@stdlib/deploy";
 import "@stdlib/ownable";
 import "./messages";
+import "./structs";
 import "./game";
 
 contract GameManager with Deployable, Ownable {
@@ -46,6 +47,16 @@ contract GameManager with Deployable, Ownable {
 
     get fun balance(): Int {
         return myBalance();
+    }
+
+    get fun context(): GameManagerContext {
+        return GameManagerContext{
+            version: self.version,
+            owner: self.owner,
+            numGames: self.numGames,
+            maxPlayers: self.maxPlayers,
+            balance: myBalance()
+        };
     }
 
     // TODO: add receive to upgrade maxPlayers

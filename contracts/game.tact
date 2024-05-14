@@ -1,5 +1,6 @@
 import "@stdlib/deploy";
 import "./messages";
+import "./structs";
 
 contract Game with Deployable {
 
@@ -243,5 +244,22 @@ contract Game with Deployable {
 
     get fun winner(): Address? {
         return self.winner;
+    }
+
+    get fun context(): GameContext {
+        return GameContext{
+            parent: self.parent,
+            seqno: self.seqno,
+            isStarted: self.isStarted,
+            isFinished: self.isFinished,
+            // maybe remove if not needed
+            players: self.players,
+            playersCounter: self.playersCounter,
+            maxPlayers: self.maxPlayers,
+            lastNumber: self.lastNumber,
+            winner: self.winner,
+            isGameFull: self.isGameFull(),
+            balance: myBalance()
+        };
     }
 }
