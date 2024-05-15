@@ -3,6 +3,7 @@ struct GameManagerContext {
     owner: Address;
     numGames: Int as uint256;
     maxPlayers: Int as uint8;
+    lastGameAddr: Address?;
     balance: Int;
 }
 

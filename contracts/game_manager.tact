@@ -55,6 +55,7 @@ contract GameManager with Deployable, Ownable {
             owner: self.owner,
             numGames: self.numGames,
             maxPlayers: self.maxPlayers,
+            lastGameAddr: self.gameAddress(self.numGames),
             balance: myBalance()
         };
     }
