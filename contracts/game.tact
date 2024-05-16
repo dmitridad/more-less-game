@@ -17,6 +17,10 @@ contract Game with Deployable, Costs {
 
     // initial value is -1
     lastNumber: Int = -1;
+    // list of generated numbers
+    numbers: map<Int as uint8, Int>;
+    numbersCounter: Int as uint8 = 0;
+
     winner: Address? = null;
     fewWinners: Bool = false;
 
@@ -48,6 +52,7 @@ contract Game with Deployable, Costs {
         let rightAnswer: Bool? = self.getRightAnswer(newNumber);
 
         self.lastNumber = newNumber;
+        self.appendNumber(self.lastNumber);
 
         let players: map<Int as uint8, Address> = self.players;
         foreach (key, value in players) {
@@ -91,6 +96,8 @@ contract Game with Deployable, Costs {
         let rightAnswer: Bool? = self.getRightAnswer(newNumber);
 
         self.lastNumber = newNumber;
+        self.appendNumber(self.lastNumber);
+
         let players: map<Int as uint8, Address> = self.players;
         foreach (key, value in players) {
             let playerAddress: Address = self.players.get(key)!!;
@@ -144,6 +151,7 @@ contract Game with Deployable, Costs {
         if(self.isGameFull()) {
             self.isStarted = true;
             self.lastNumber = self.runRandom();
+            self.appendNumber(self.lastNumber);
         }
     }
 
@@ -202,6 +210,11 @@ contract Game with Deployable, Costs {
     fun appendPlayer(playerAddress: Address) {
         self.players.set(self.playersCounter, playerAddress);
         self.playersCounter += 1;
+    }
+
+    fun appendNumber(number: Int) {
+        self.numbers.set(self.numbersCounter, number);
+        self.numbersCounter += 1;
     }
 
     fun runRandom(): Int {
@@ -270,11 +283,12 @@ contract Game with Deployable, Costs {
             seqno: self.seqno,
             isStarted: self.isStarted,
             isFinished: self.isFinished,
-            // maybe remove if not needed
+            // TODO: remove if not needed
             players: self.players,
             playersCounter: self.playersCounter,
             maxPlayers: self.maxPlayers,
             lastNumber: self.lastNumber,
+            numbers: self.numbers,
             winner: self.winner,
             fewWinners: self.fewWinners,
             isGameFull: self.isGameFull(),

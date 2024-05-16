@@ -16,6 +16,7 @@ struct GameContext {
     playersCounter: Int as uint8;
     maxPlayers: Int as uint8;
     lastNumber: Int;
+    numbers: map<Int as uint8, Int>;
     winner: Address?;
     fewWinners: Bool;
     isGameFull: Bool;
