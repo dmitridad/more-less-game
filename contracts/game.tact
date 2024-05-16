@@ -1,8 +1,9 @@
 import "@stdlib/deploy";
 import "./messages";
 import "./structs";
+import "./traits";
 
-contract Game with Deployable {
+contract Game with Deployable, Costs {
 
     parent: Address;
     seqno: Int as uint256;
@@ -32,6 +33,7 @@ contract Game with Deployable {
 
     // for external use
     receive("AddNewPlayer") {
+        require(context().value >= self.GAME_COST, "Low cost of the game");
         self.addNewPlayer(sender());
     }
 
@@ -120,7 +122,6 @@ contract Game with Deployable {
     }
 
     fun addNewPlayer(playerAddress: Address) {
-        // TODO: check amount of tons
         require(!self.isStarted, "Game already started");
         require(!self.isGameFull(), "Game is full");
 

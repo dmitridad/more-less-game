@@ -3,8 +3,9 @@ import "@stdlib/ownable";
 import "./messages";
 import "./structs";
 import "./game";
+import "./traits";
 
-contract GameManager with Deployable, Ownable {
+contract GameManager with Deployable, Ownable, Costs {
 
     version: Int as uint8;
     owner: Address;
@@ -17,6 +18,7 @@ contract GameManager with Deployable, Ownable {
     }
 
     receive("CreateNewGame") {
+        require(context().value >= self.GAME_COST, "Low cost of the game");
         self.numGames += 1;
         let init: StateInit = initOf Game(myAddress(), self.numGames, self.maxPlayers);
 
