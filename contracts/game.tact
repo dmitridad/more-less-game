@@ -50,7 +50,12 @@ contract Game with Deployable {
         let players: map<Int as uint8, Address> = self.players;
         foreach (key, value in players) {
             let playerAddress: Address = self.players.get(key)!!;
-            // TODO: temporary solution (we need to check if we have this player address)
+            if (msg.results.get(playerAddress) == null) {
+                self.sendRemainingValue(sender(), "Non-existent player address");
+
+                return;
+            }
+
             let playerAnswer: Bool = msg.results.get(playerAddress)!!;
 
             if (playerAnswer == rightAnswer) {
@@ -69,8 +74,7 @@ contract Game with Deployable {
         }
 
         self.isFinished = true;
-        // temporarary commented
-        // self.distributeBalance();
+        self.distributeBalance();
     }
 
     // TODO: most likely a temporary method
@@ -88,6 +92,12 @@ contract Game with Deployable {
         let players: map<Int as uint8, Address> = self.players;
         foreach (key, value in players) {
             let playerAddress: Address = self.players.get(key)!!;
+            if (msg.results.get(key) == null) {
+                self.sendRemainingValue(sender(), "Non-existent player key");
+
+                return;
+            }
+
             let playerAnswer: Bool = msg.results.get(key)!!;
 
             if (playerAnswer == rightAnswer) {
@@ -123,7 +133,7 @@ contract Game with Deployable {
                     self.appendPlayer(playerAddress);
                 } else {
                     // send remaining value, player is already in the game
-                    self.sendRemainingValue(playerAddress);
+                    self.sendRemainingValue(playerAddress, null);
 
                     return;
                 }
@@ -162,7 +172,7 @@ contract Game with Deployable {
         }
 
         // send remaining value to the sender
-        self.sendRemainingValue(sender());
+        self.sendRemainingValue(sender(), null);
 
         if (self.winner != null) {
             send(SendParameters{
@@ -200,12 +210,16 @@ contract Game with Deployable {
         return random(1, 1000);
     }
 
-    fun sendRemainingValue(address: Address) {
+    fun sendRemainingValue(address: Address, msg: String?) {
+        if (msg == null) {
+            msg = "Refund of the remaining value";
+        }
+
         send(SendParameters{
             to: address,
             value: 0,
             mode: SendRemainingValue,
-            body: "Refund of the remaining value".asComment()
+            body: msg!!.asComment()
         });
     }
 
