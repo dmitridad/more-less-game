@@ -47,9 +47,9 @@ contract Game with Deployable {
 
         self.lastNumber = newNumber;
 
-        let i: Int = 0;
-        while (i < self.playersCounter) {
-            let playerAddress: Address = self.players.get(i)!!;
+        let players: map<Int as uint8, Address> = self.players;
+        foreach (key, value in players) {
+            let playerAddress: Address = self.players.get(key)!!;
             // TODO: temporary solution (we need to check if we have this player address)
             let playerAnswer: Bool = msg.results.get(playerAddress)!!;
 
@@ -62,8 +62,6 @@ contract Game with Deployable {
                     self.fewWinners = true;
                 }
             }
-            
-            i += 1;
         }
 
         if (rightAnswerPlayerAddress != null) {
@@ -87,11 +85,10 @@ contract Game with Deployable {
         let rightAnswer: Bool? = self.getRightAnswer(newNumber);
 
         self.lastNumber = newNumber;
-
-        let i: Int = 0;
-        while (i < self.playersCounter) {
-            let playerAddress: Address = self.players.get(i)!!;
-            let playerAnswer: Bool = msg.results.get(i)!!;
+        let players: map<Int as uint8, Address> = self.players;
+        foreach (key, value in players) {
+            let playerAddress: Address = self.players.get(key)!!;
+            let playerAnswer: Bool = msg.results.get(key)!!;
 
             if (playerAnswer == rightAnswer) {
                 if (rightAnswerPlayerAddress == null) {
@@ -102,8 +99,6 @@ contract Game with Deployable {
                     self.fewWinners = true;
                 }
             }
-            
-            i += 1;
         }
 
         if (rightAnswerPlayerAddress != null) {
@@ -122,19 +117,16 @@ contract Game with Deployable {
         if (self.playersCounter == 0) {
             self.appendPlayer(playerAddress);
         } else {
-            // TODO: use foreach (k, v in m) {}
-            let i: Int = 0;
-            let counter: Int = self.playersCounter;
-            while (i < counter) {
-                if(self.players.get(i)!! != playerAddress) {
+            let players: map<Int as uint8, Address> = self.players;
+            foreach (key, value in players) {
+                if(self.players.get(key)!! != playerAddress) {
                     self.appendPlayer(playerAddress);
                 } else {
+                    // send remaining value, player is already in the game
                     self.sendRemainingValue(playerAddress);
 
                     return;
                 }
-
-                i += 1;
             }
         }
 
@@ -183,18 +175,15 @@ contract Game with Deployable {
             // amount for transaction fee
             let safeAmount: Int = ton("0.025");
             let amount: Int = (myBalance() / self.playersCounter) - safeAmount;
+            let players: map<Int as uint8, Address> = self.players;
 
-            // TODO: use foreach (k, v in m) {}
-            let i: Int = 0;
-            while (i < self.playersCounter) {
+            foreach (key, value in players) {
                 send(SendParameters{
-                    to: self.players.get(i)!!,
+                    to: self.players.get(key)!!,
                     value: amount,
                     mode: SendIgnoreErrors,
                     body: "Money refund".asComment()
                 });
-            
-                i += 1;
             }
         }
     }
