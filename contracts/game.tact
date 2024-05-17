@@ -277,18 +277,19 @@ contract Game with Deployable, Costs {
         return self.winner;
     }
 
+    get fun numbers(): map<Int as uint8, Int> {
+        return self.numbers;
+    }
+
     get fun context(): GameContext {
         return GameContext{
             parent: self.parent,
             seqno: self.seqno,
             isStarted: self.isStarted,
             isFinished: self.isFinished,
-            // TODO: remove if not needed
-            players: self.players,
             playersCounter: self.playersCounter,
             maxPlayers: self.maxPlayers,
             lastNumber: self.lastNumber,
-            numbers: self.numbers,
             winner: self.winner,
             fewWinners: self.fewWinners,
             isGameFull: self.isGameFull(),

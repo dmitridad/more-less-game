@@ -12,11 +12,9 @@ struct GameContext {
     seqno: Int as uint256;
     isStarted: Bool;
     isFinished: Bool;
-    players: map<Int as uint8, Address>;
     playersCounter: Int as uint8;
     maxPlayers: Int as uint8;
     lastNumber: Int;
-    numbers: map<Int as uint8, Int>;
     winner: Address?;
     fewWinners: Bool;
     isGameFull: Bool;
